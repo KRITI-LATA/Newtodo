@@ -84,7 +84,11 @@ const checkRequestsQueries = async (request, response, next) => {
     try {
       const myDate = new Date(date);
       const formatedDate = format(new Date(date), "yyyy-MM-dd");
-      const result = toDate(new Date(formatedDate));
+      const result = toDate(
+        new Date(
+          `${myDate.getFullYear()}-${myDate.getMonth() + 1}-${myDate.getDate()}`
+        )
+      );
 
       const isValidDate = isValid(result);
       console.log(isValidDate);
@@ -260,8 +264,9 @@ app.get("/todos/:todoId/", checkRequestsQueries, async (request, response) => {
 app.post("/todos/", checkRequestBody, async (request, response) => {
   const createTodo = request.body;
   const { id, todo, priority, status, category, dueDate } = createTodo;
+  const newDate = new Date(dueDate);
   const createTodoQuery = `insert into todo (id, todo, priority, status, category, due_date) values 
-    (${id}, '${todo}', '${priority}', '${status}', '${category}', '${dueDate}')`;
+    (${id}, '${todo}', '${priority}', '${status}', '${category}', '${newDate}')`;
   const todoCreated = await db.run(createTodoQuery);
   response.send("Todo Successfully Added");
 });
@@ -271,8 +276,10 @@ app.post("/todos/", checkRequestBody, async (request, response) => {
 app.get("/agenda/", checkRequestsQueries, async (request, response) => {
   const { date } = request.params;
 
+  const newDate = new Date(date);
+  console.log(newDate);
   const selectDueDateQuery = `select * from todo where 
-    due_date = '${date}';`;
+    due_date = '${newDate}';`;
 
   const todoArray = await db.all(selectDueDateQuery);
 
